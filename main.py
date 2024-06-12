@@ -4,6 +4,8 @@ import random
 
 # Classe para representar um carro
 class Carro(threading.Thread):
+    semaforo = threading.Semaphore(1)  # Semáforo com valor inicial 1
+
     def __init__(self, nome, pista):
         super().__init__()
         self.nome = nome
@@ -15,8 +17,20 @@ class Carro(threading.Thread):
         while self.posicao < len(self.pista) - 1:  # Enquanto não chegar ao final da pista
             time.sleep(0.05)  # Ajusta o intervalo de tempo entre cada atualização da posição
             self.posicao += self.velocidade
-            print(f'{self.nome} percorreu {self.posicao} metros')
-        print(f'{self.nome} chegou ao final!')
+
+            # Utiliza o semáforo para controlar a impressão
+            Carro.semaforo.acquire()
+            try:
+                print(f'{self.nome} percorreu {self.posicao} metros')
+            finally:
+                Carro.semaforo.release()
+
+        # Utiliza o semáforo para controlar a impressão
+        Carro.semaforo.acquire()
+        try:
+            print(f'{self.nome} chegou ao final!')
+        finally:
+            Carro.semaforo.release()
 
 # Função para exibir a posição final dos carros de forma aleatória
 def exibir_posicao_final_aleatoria(carros):
